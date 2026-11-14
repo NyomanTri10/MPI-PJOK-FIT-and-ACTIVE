@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT & ACTIVE CHALLENGE – Misi Menjadi Remaja Bugar dan Sehat</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sportBlue: '#0052FF',
+                        sportNavy: '#0A1128',
+                        neonGreen: '#00FF66',
+                        darkCard: '#121D38',
+                        darkBg: '#070C1B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js untuk Efek Suara Interaktif -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glow-effect { box-shadow: 0 0 25px rgba(0, 255, 102, 0.25); }
+        .glow-blue { box-shadow: 0 0 25px rgba(0, 82, 255, 0.3); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #070C1B; }
+        ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00FF66; }
+    </style>
+</head>
+<body class="bg-darkBg text-white min-h-screen flex flex-col selection:bg-neonGreen selection:text-darkBg">
+
+    <!-- MODAL CUSTOM NOTIFICATION (No alert() used) -->
+    <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-darkCard border border-sportBlue/40 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl text-center">
+            <div id="modalIcon" class="text-4xl text-neonGreen mb-3"><i class="fa-solid fa-circle-check"></i></div>
+            <h3 id="modalTitle" class="text-xl font-bold mb-2">Informasi</h3>
+            <p id="modalMessage" class="text-gray-300 text-sm mb-6 leading-relaxed">Pesan notifikasi...</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-sportBlue hover:bg-blue-600 font-bold rounded-xl transition shadow-lg shadow-sportBlue/30 text-white">
+                Mengerti / Lanjutkan
+            </button>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVBAR (Shown when logged in) -->
+    <header id="mainHeader" class="hidden sticky top-0 z-40 bg-darkCard/90 backdrop-blur-md border-b border-white/10 px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-sportBlue to-neonGreen p-2.5 rounded-xl text-darkBg font-black text-xl shadow-lg">
+                <i class="fa-solid fa-bolt-lightning"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-lg lg:text-xl tracking-tight text-white flex items-center gap-2">
+                    FIT & ACTIVE <span class="text-neonGreen text-xs px-2 py-0.5 rounded-full bg-neonGreen/10 border border-neonGreen/30 uppercase tracking-widest font-bold">Kelas IX</span>
+                </h1>
+                <p class="text-xs text-gray-400">"Kenali Tubuhmu, Latih Kemampuanmu, Raih Kebugaranmu!"</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Student Profile Badge -->
+            <div class="hidden sm:flex items-center space-x-3 bg-darkBg/80 px-4 py-2 rounded-xl border border-white/10">
+                <div class="w-9 h-9 rounded-full bg-sportBlue/30 flex items-center justify-center text-neonGreen font-bold border border-sportBlue">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div class="text-left">
+                    <p id="navStudentName" class="text-xs font-bold text-white truncate max-w-[120px]">Siswa</p>
+                    <p id="navStudentClass" class="text-[10px] text-gray-400">Kelas IX</p>
+                </div>
+            </div>
+
+            <!-- XP & Level Display -->
+            <div class="flex items-center space-x-2 bg-darkBg/80 px-3 py-2 rounded-xl border border-neonGreen/30 glow-effect">
+                <div class="text-neonGreen text-sm"><i class="fa-solid fa-star"></i></div>
+                <div>
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Level & XP</div>
+                    <div class="text-xs font-black text-neonGreen"><span id="displayLevel">1</span> (<span id="displayXP">0</span> XP)</div>
+                </div>
+            </div>
+
+            <!-- Sound Toggle Button -->
+            <button onclick="toggleSound()" id="btnSoundToggle" title="Suara Efek Aktif" class="p-2.5 bg-sportBlue/20 hover:bg-sportBlue/30 text-neonGreen rounded-xl border border-sportBlue/40 transition flex items-center gap-1.5 text-xs font-bold">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Switch Student / Ganti Siswa -->
+            <button onclick="openSwitchStudentModal()" title="Ganti Siswa" class="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30 transition flex items-center gap-1.5 text-xs font-bold">
+                <i class="fa-solid fa-user-pen"></i> <span class="hidden md:inline">Ganti Siswa</span>
+            </button>
+
+            <!-- Exit / Keluar -->
+            <button onclick="openExitModal()" title="Keluar Aplikasi" class="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl border border-red-500/30 transition flex items-center gap-1.5 text-xs font-bold">
+                <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden md:inline">Exit</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CUSTOM CONFIRMATION MODAL (Untuk Ganti Siswa & Exit tanpa confirm() bawaan) -->
+    <div id="confirmActionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-darkCard border border-sportBlue/40 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl text-center space-y-4">
+            <div id="confirmIcon" class="text-4xl text-amber-400"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 id="confirmTitle" class="text-xl font-bold text-white">Konfirmasi</h3>
+            <p id="confirmMessage" class="text-gray-300 text-sm leading-relaxed">Apakah Anda yakin?</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-gray-200 font-bold rounded-xl transition text-xs">
+                    Batal
+                </button>
+                <button id="btnConfirmProceed" class="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition text-xs shadow-lg">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXIT SCREEN OVERLAY -->
+    <div id="exitScreenOverlay" class="fixed inset-0 z-50 bg-darkBg flex flex-col items-center justify-center p-6 text-center hidden">
+        <div class="max-w-md w-full bg-darkCard border border-sportBlue/30 rounded-3xl p-8 space-y-6 shadow-2xl glow-blue">
+            <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-sportBlue to-neonGreen flex items-center justify-center text-4xl text-darkBg shadow-lg">
+                <i class="fa-solid fa-hand-peace"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white">Terima Kasih Telah Berlatih!</h2>
+            <p class="text-sm text-gray-300 leading-relaxed">
+                Sesi pembelajaran <strong>FIT & ACTIVE CHALLENGE</strong> telah diakhiri. Terus jaga kebugaran jasmani dan pola hidup sehat setiap hari!
+            </p>
+            <button onclick="restartFromExit()" class="w-full py-3.5 bg-sportBlue hover:bg-blue-600 text-white font-black rounded-xl transition shadow-lg text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> Masuk Kembali ke Aplikasi
+            </button>
+        </div>
+    </div>
+
+    <!-- NAVIGATION TABS (Shown when logged in) -->
+    <nav id="mainNav" class="hidden bg-darkCard/60 border-b border-white/5 px-4 lg:px-8 py-2 overflow-x-auto">
+        <div class="flex space-x-2 min-w-max">
+            <button onclick="switchTab('welcome')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-sportBlue text-white shadow-lg" data-tab="welcome">
+                <i class="fa-solid fa-house"></i> Beranda
+            </button>
+            <button onclick="switchTab('apersepsi')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="apersepsi">
+                <i class="fa-solid fa-lightbulb text-yellow-400"></i> Apersepsi
+            </button>
+            <button onclick="switchTab('materi')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="materi">
+                <i class="fa-solid fa-book-open text-blue-400"></i> Materi Kebugaran
+            </button>
+            <button onclick="switchTab('training')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="training">
+                <i class="fa-solid fa-dumbbell text-neonGreen"></i> Training Zone
+            </button>
+            <button onclick="switchTab('fitness-test')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="fitness-test">
+                <i class="fa-solid fa-heart-pulse text-red-400"></i> Fitness Test
+            </button>
+            <button onclick="switchTab('daily-mission')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="daily-mission">
+                <i class="fa-solid fa-calendar-check text-emerald-400"></i> Daily Mission
+            </button>
+            <button onclick="switchTab('quiz')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="quiz">
+                <i class="fa-solid fa-brain text-purple-400"></i> Quiz Challenge
+            </button>
+            <button onclick="switchTab('refleksi')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="refleksi">
+                <i class="fa-solid fa-comment-dots text-orange-400"></i> Refleksi
+            </button>
+            <button onclick="switchTab('report')" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-300 hover:bg-white/5 hover:text-white" data-tab="report">
+                <i class="fa-solid fa-award text-yellow-400"></i> My Report
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+
+        <!-- ==================== 1. WELCOME TAB / HALAMAN PEMBUKA ==================== -->
+        <section id="tab-welcome" class="tab-content space-y-8 animate-fadeIn">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-darkCard via-sportNavy to-darkCard border border-sportBlue/30 p-8 lg:p-12 shadow-2xl glow-blue">
+                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-sportBlue/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-80 h-80 bg-neonGreen/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neonGreen/10 border border-neonGreen/30 text-neonGreen text-xs font-extrabold uppercase tracking-widest">
+                            <i class="fa-solid fa-fire"></i> Media Pembelajaran Interaktif PJOK
+                        </div>
+                        <h1 class="text-4xl lg:text-6xl font-black tracking-tight leading-none text-white">
+                            FIT & ACTIVE <span class="text-transparent bg-clip-text bg-gradient-to-r from-sportBlue via-blue-400 to-neonGreen">CHALLENGE</span>
+                        </h1>
+                        <p class="text-lg lg:text-xl font-bold text-gray-300">
+                            "Kenali Tubuhmu, Latih Kemampuanmu, Raih Kebugaranmu!"
+                        </p>
+                        <p class="text-gray-400 text-sm leading-relaxed max-w-xl">
+                            Selamat datang di petualangan kebugaran jasmani khusus murid kelas IX SMP! Tingkatkan kesehatan, pelajari komponen kebugaran, taklukkan tantangan harian, dan jadilah remaja bugar berprestasi.
+                        </p>
+
+                        <!-- Input Form -->
+                        <div class="bg-darkBg/80 p-6 rounded-2xl border border-white/10 space-y-4 max-w-lg shadow-inner">
+                            <h3 class="text-sm font-bold text-neonGreen flex items-center gap-2">
+                                <i class="fa-solid fa-id-card"></i> Masukkan Identitas Kamu Sebelum Memulai:
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nama Lengkap Murid</label>
+                                    <input type="text" id="inputName" placeholder="Contoh: Raka Pratama" class="w-full bg-darkCard border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neonGreen transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">Kelas</label>
+                                    <select id="inputClass" class="w-full bg-darkCard border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neonGreen transition">
+                                        <option value="IX-A">Kelas IX-A</option>
+                                        <option value="IX-B">Kelas IX-B</option>
+                                        <option value="IX-C">Kelas IX-C</option>
+                                        <option value="IX-D">Kelas IX-D</option>
+                                        <option value="IX-E">Kelas IX-E</option>
+                                        <option value="IX-F">Kelas IX-F</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="startAdventure()" class="w-full py-3.5 bg-gradient-to-r from-sportBlue to-emerald-500 hover:from-blue-600 hover:to-emerald-600 text-darkBg font-black rounded-xl transition shadow-lg shadow-sportBlue/30 text-base tracking-wide flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rocket"></i> MULAI PETUALANGAN SEKARANG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Visual Card -->
+                    <div class="lg:col-span-5 flex flex-col items-center justify-center">
+                        <div class="w-full max-w-sm bg-darkCard/80 border border-white/10 rounded-3xl p-6 text-center space-y-6 shadow-2xl relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-neonGreen/10 rounded-full blur-2xl"></div>
+                            <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-tr from-sportBlue to-neonGreen flex items-center justify-center text-4xl text-darkBg shadow-xl">
+                                <i class="fa-solid fa-person-running"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">"Tubuh Bugar, Belajar Semangat, Prestasi Meningkat!"</h3>
+                                <p class="text-xs text-gray-400 mt-2">Kebugaran bukan tentang siapa yang paling kuat, tetapi tentang bagaimana kita terus berusaha menjadi lebih sehat dan aktif setiap hari.</p>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
+                                <div class="bg-darkBg/60 p-3 rounded-xl border border-white/5">
+                                    <div class="text-neonGreen font-black text-base">6</div>
+                                    <div class="text-[10px] text-gray-400">Komponen</div>
+                                </div>
+                                <div class="bg-darkBg/60 p-3 rounded-xl border border-white/5">
+                                    <div class="text-blue-400 font-black text-base">15</div>
+                                    <div class="text-[10px] text-gray-400">Soal HOTS</div>
+                                </div>
+                                <div class="bg-darkBg/60 p-3 rounded-xl border border-white/5">
+                                    <div class="text-purple-400 font-black text-base">4</div>
+                                    <div class="text-[10px] text-gray-400">Level Rank</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 2. APERSEPSI TAB ==================== -->
+        <section id="tab-apersepsi" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-yellow-500/10 text-yellow-400 rounded-2xl border border-yellow-500/20 text-2xl">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white">Menu Apersepsi: Seberapa Bugar Tubuhmu?</h2>
+                        <p class="text-xs text-gray-400">Jawab pertanyaan pemantik berikut berdasarkan pengalaman sehari-hari sebelum mempelajari materi lebih dalam.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-sportBlue/20 text-sportBlue border border-sportBlue/30">Pertanyaan 1</span>
+                        <h3 class="font-bold text-base text-white">Mengapa kita mudah merasa lelah ketika berlari jarak jauh atau naik tangga sekolah?</h3>
+                        <p class="text-xs text-gray-300">Diskusikan atau pikirkan: Apa kaitannya dengan daya tahan jantung dan paru-paru?</p>
+                        <button onclick="openApersepsiModal('Jantung dan Paru-paru', 'Ketika berlari, otot membutuhkan lebih banyak oksigen. Jika daya tahan jantung dan paru-paru (cardiorespiratory endurance) belum terlatih, pasokan oksigen tidak mencukupi sehingga asam laktat menumpuk dan tubuh cepat lelah.')" class="px-4 py-2 bg-sportBlue/20 hover:bg-sportBlue text-sportBlue hover:text-white text-xs font-bold rounded-xl border border-sportBlue/30 transition">
+                            <i class="fa-solid fa-eye"></i> Lihat Penjelasan Konsep
+                        </button>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-neonGreen/20 text-neonGreen border border-neonGreen/30">Pertanyaan 2</span>
+                        <h3 class="font-bold text-base text-white">Mengapa ada orang yang mampu melakukan push-up atau sit-up berkali-kali tanpa merasa cepat pegal?</h3>
+                        <p class="text-xs text-gray-300">Pikirkan: Bagaimana kekuatan otot dan daya tahan otot bekerja pada aktivitas tersebut?</p>
+                        <button onclick="openApersepsiModal('Kekuatan & Daya Tahan Otot', 'Hal tersebut dipengaruhi oleh kekuatan otot (muscular strength) dan daya tahan otot (muscular endurance). Otot yang sering dilatih memiliki serat yang lebih kuat dan efisien dalam menghasilkan kontraksi berulang.')" class="px-4 py-2 bg-neonGreen/20 hover:bg-neonGreen text-neonGreen hover:text-darkBg text-xs font-bold rounded-xl border border-neonGreen/30 transition">
+                            <i class="fa-solid fa-eye"></i> Lihat Penjelasan Konsep
+                        </button>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">Pertanyaan 3</span>
+                        <h3 class="font-bold text-base text-white">Mengapa kita perlu melatih kekuatan, kelentukan, dan kecepatan secara seimbang?</h3>
+                        <p class="text-xs text-gray-300">Pikirkan: Apakah kebugaran hanya seberapa banyak beban yang bisa diangkat?</p>
+                        <button onclick="openApersepsiModal('Komponen Menyeluruh', 'Kebugaran jasmani bersifat menyeluruh (multidimensional). Keseimbangan antara kekuatan, kelentukan, kecepatan, dan kelincahan sangat penting agar terhindar dari cedera dan menunjang aktivitas harian secara optimal.')" class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500 text-purple-400 hover:text-white text-xs font-bold rounded-xl border border-purple-500/30 transition">
+                            <i class="fa-solid fa-eye"></i> Lihat Penjelasan Konsep
+                        </button>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Pertanyaan 4</span>
+                        <h3 class="font-bold text-base text-white">Apakah bermain sepak bola, bersepeda, dan berjalan kaki rutin dapat meningkatkan kebugaran?</h3>
+                        <p class="text-xs text-gray-300">Analisis: Aktivitas fisik apa saja yang sudah kamu lakukan minggu ini?</p>
+                        <button onclick="openApersepsiModal('Aktivitas Fisik & Kebugaran', 'Sangat bisa! Setiap aktivitas fisik yang melibatkan gerak tubuh dan meningkatkan detak jantung (latihan aerobik maupun anaerobik) secara konsisten terbukti meningkatkan komponen kebugaran jasmani secara bertahap.')" class="px-4 py-2 bg-blue-500/20 hover:bg-blue-500 text-blue-400 hover:text-white text-xs font-bold rounded-xl border border-blue-500/30 transition">
+                            <i class="fa-solid fa-eye"></i> Lihat Penjelasan Konsep
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-sportBlue/10 border border-sportBlue/30 rounded-2xl flex items-center justify-between">
+                    <p class="text-xs text-gray-300"><i class="fa-solid fa-circle-info text-sportBlue mr-1"></i> Setelah menjawab apersepsi, lanjutkan ke Menu Materi untuk mendalami setiap komponen kebugaran jasmani!</p>
+                    <button onclick="switchTab('materi'); addXP(10);" class="px-4 py-2 bg-sportBlue hover:bg-blue-600 font-bold rounded-xl text-xs transition shadow text-white flex items-center gap-2">
+                        Lanjut ke Materi <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. MATERI TAB ==================== -->
+        <section id="tab-materi" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-sportBlue/20 text-sportBlue rounded-2xl border border-sportBlue/30 text-2xl">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Menu Materi: Mengenal Kebugaran Jasmani</h2>
+                            <p class="text-xs text-gray-400">Pahami 6 komponen utama kebugaran jasmani beserta bentuk latihan dan penerapannya dalam kehidupan sehari-hari.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="filterMateri('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-sportBlue text-white transition materi-filter-btn" data-filter="all">Semua</button>
+                        <button onclick="filterMateri('cardio')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="cardio">Cardio</button>
+                        <button onclick="filterMateri('strength')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="strength">Kekuatan</button>
+                        <button onclick="filterMateri('endurance')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="endurance">Daya Tahan</button>
+                        <button onclick="filterMateri('flexibility')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="flexibility">Kelentukan</button>
+                        <button onclick="filterMateri('speed')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="speed">Kecepatan</button>
+                        <button onclick="filterMateri('agility')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-darkBg text-gray-300 hover:bg-white/10 transition materi-filter-btn" data-filter="agility">Kelincahan</button>
+                    </div>
+                </div>
+
+                <!-- Materi Cards Container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="materiGrid">
+                    
+                    <!-- 1. Cardio -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="cardio">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">A. Cardiorespiratory</span>
+                                <i class="fa-solid fa-heart-pulse text-blue-400 text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Daya Tahan Jantung & Paru-paru</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Kemampuan jantung, paru-paru, dan pembuluh darah dalam menyalurkan oksigen ke otot secara efisien saat melakukan aktivitas fisik dalam waktu relatif lama.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Mengurangi risiko penyakit jantung, meningkatkan stamina belajar.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Jogging, jalan cepat, bersepeda, skipping, berenang.</p>
+                                <p><strong class="text-white">Penerapan:</strong> Berjalan kaki ke sekolah, naik tangga tanpa ngos-ngosan.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Cardio Zone', 'Jogging di tempat, Jumping jack, Skipping, Jalan cepat')" class="w-full py-2.5 bg-sportBlue/20 hover:bg-sportBlue text-sportBlue hover:text-white font-bold rounded-xl text-xs transition border border-sportBlue/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Cardio
+                        </button>
+                    </div>
+
+                    <!-- 2. Strength -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="strength">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-neonGreen/20 text-neonGreen border border-neonGreen/30">B. Muscular Strength</span>
+                                <i class="fa-solid fa-dumbbell text-neonGreen text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Kekuatan Otot</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Kemampuan otot dalam menghasilkan tenaga (maksimal force) saat menghadapi suatu tahanan atau beban tertentu dalam satu kontraksi penuh.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Postur tubuh tegap, mencegah cedera, mempermudah angkat beban.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Push-up, squat, plank, sit-up.</p>
+                                <p><strong class="text-white">Teknik Benar:</strong> Jaga punggung lurus saat push-up dan lutut tidak melebihi ujung jari saat squat.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Strength Zone', 'Push-up, Squat, Plank, Lunges')" class="w-full py-2.5 bg-neonGreen/20 hover:bg-neonGreen text-neonGreen hover:text-darkBg font-bold rounded-xl text-xs transition border border-neonGreen/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Kekuatan
+                        </button>
+                    </div>
+
+                    <!-- 3. Endurance -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="endurance">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">C. Muscular Endurance</span>
+                                <i class="fa-solid fa-person-running text-purple-400 text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Daya Tahan Otot</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Kemampuan kelompok otot untuk melakukan kontraksi secara berulang-ulang dalam jangka waktu tertentu tanpa mengalami kelelahan yang berarti.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Mengurangi kelelahan otot saat bekerja atau beraktivitas lama.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Squat berulang, sit-up berulang, push-up sesuai kemampuan.</p>
+                                <p><strong class="text-white">Penerapan:</strong> Membawa tas sekolah yang berat atau mencatat pelajaran lama tanpa pegal.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Endurance Zone', 'Sit-up, Squat berulang, Push-up berulang')" class="w-full py-2.5 bg-purple-500/20 hover:bg-purple-500 text-purple-400 hover:text-white font-bold rounded-xl text-xs transition border border-purple-500/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Daya Tahan
+                        </button>
+                    </div>
+
+                    <!-- 4. Flexibility -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="flexibility">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">D. Flexibility</span>
+                                <i class="fa-solid fa-child-reaching text-emerald-400 text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Kelentukan (Fleksibilitas)</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Luas gerak persendian tubuh secara maksimal tanpa mengalami hambatan atau cedera pada otot dan sendi yang bersangkutan.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Kelenturan gerak, kelancaran sendi, pencegahan cedera otot.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Peregangan statis, dynamic stretching, sit and reach.</p>
+                                <p><strong class="text-white">Penerapan:</strong> Membungkuk mengambil benda, keluwesan dalam senam/olahraga.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Flexibility Zone', 'Peregangan otot kaki, Peregangan bahu, Sit and reach')" class="w-full py-2.5 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-darkBg font-bold rounded-xl text-xs transition border border-emerald-500/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Kelentukan
+                        </button>
+                    </div>
+
+                    <!-- 5. Speed -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="speed">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">E. Speed</span>
+                                <i class="fa-solid fa-bolt text-yellow-400 text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Kecepatan</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Kemampuan tubuh untuk melakukan perpindahan gerak dari satu tempat ke tempat lain dalam waktu yang sesingkat-singkatnya.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Reaksi cepat, performa lari sprint yang optimal.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Sprint 30 meter, lari akselerasi.</p>
+                                <p><strong class="text-white">Penerapan:</strong> Mengejar bola dalam permainan sepak bola atau lari cepat saat darurat.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Speed Zone', 'Sprint 30 meter, Lari akselerasi')" class="w-full py-2.5 bg-yellow-500/20 hover:bg-yellow-500 text-yellow-400 hover:text-white font-bold rounded-xl text-xs transition border border-yellow-500/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Kecepatan
+                        </button>
+                    </div>
+
+                    <!-- 6. Agility -->
+                    <div class="materi-item bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4 flex flex-col justify-between" data-category="agility">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">F. Agility</span>
+                                <i class="fa-solid fa-arrows-split-up-and-left text-red-400 text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-white">Kelincahan</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed">
+                                Kemampuan tubuh dalam mengubah posisi tubuh atau arah kecepatan secara cepat dan tepat tanpa kehilangan keseimbangan.
+                            </p>
+                            <div class="space-y-1.5 text-xs text-gray-400 pt-2 border-t border-white/5">
+                                <p><strong class="text-white">Manfaat:</strong> Refleks tubuh gesit, manuver lincah dalam olahraga beregu.</p>
+                                <p><strong class="text-white">Contoh Latihan:</strong> Shuttle run (lari bolak-balik), zig-zag run.</p>
+                                <p><strong class="text-white">Penerapan:</strong> Menghindar saat bermain bentengan atau melewati rintangan di jalan.</p>
+                            </div>
+                        </div>
+                        <button onclick="openTrainingPos('Agility Zone', 'Shuttle run, Zig-zag run, Lari bolak-balik')" class="w-full py-2.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold rounded-xl text-xs transition border border-red-500/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-dumbbell"></i> Coba Tantangan Kelincahan
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="p-4 bg-darkBg border border-white/10 rounded-2xl flex items-center justify-between">
+                    <p class="text-xs text-gray-300"><i class="fa-solid fa-award text-neonGreen mr-1"></i> Selesaikan membaca materi untuk mendapatkan +20 XP tambahan!</p>
+                    <button onclick="addXP(20); showModal('Materi Selesai!', 'Hebat! Kamu telah membaca seluruh materi komponen kebugaran jasmani. +20 XP ditambahkan.')" class="px-4 py-2 bg-neonGreen text-darkBg font-bold rounded-xl text-xs transition shadow hover:bg-emerald-400">
+                        Klaim XP Materi <i class="fa-solid fa-check ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 4. TRAINING ZONE TAB ==================== -->
+        <section id="tab-training" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-neonGreen/20 text-neonGreen rounded-2xl border border-neonGreen/30 text-2xl">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Laboratorium Latihan: Fitness Training Zone</h2>
+                            <p class="text-xs text-gray-400">Gunakan timer interaktif untuk simulasi latihan mandiri di rumah atau sekolah. Utamakan pemanasan & keselamatan!</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-darkBg px-4 py-2 rounded-xl border border-white/10">
+                        <span class="text-xs text-gray-400">Pilih Pos Latihan:</span>
+                        <select id="trainingPosSelect" onchange="changeTrainingPos()" class="bg-sportNavy text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-white/20 focus:outline-none">
+                            <option value="Cardio Zone">Pos 1: Cardio Zone (Jogging/Skipping)</option>
+                            <option value="Strength Zone">Pos 2: Strength Zone (Push-up/Squat)</option>
+                            <option value="Endurance Zone">Pos 3: Endurance Zone (Sit-up Berulang)</option>
+                            <option value="Flexibility Zone">Pos 4: Flexibility Zone (Sit & Reach/Stretching)</option>
+                            <option value="Speed Zone">Pos 5: Speed Zone (Sprint 30m)</option>
+                            <option value="Agility Zone">Pos 6: Agility Zone (Shuttle Run)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Training Arena Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    
+                    <!-- Left Instructions -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 id="activePosTitle" class="text-xl font-black text-neonGreen">Pos 1: Cardio Zone</h3>
+                                <span class="px-3 py-1 bg-neonGreen/10 text-neonGreen text-xs font-bold rounded-full border border-neonGreen/30">Aktif</span>
+                            </div>
+                            <p id="activePosDesc" class="text-xs text-gray-300 leading-relaxed">
+                                Latihan kardiorespirasi meningkatkan denyut jantung dan melatih kapasitas paru-paru. Lakukan gerakan secara ritmis dan berkesinambungan.
+                            </p>
+                            <div class="space-y-2 text-xs text-gray-300">
+                                <p class="font-bold text-white"><i class="fa-solid fa-list-check text-sportBlue mr-1"></i> Gerakan Latihan:</p>
+                                <ul id="activePosExercises" class="list-disc list-inside space-y-1 text-gray-400 pl-2">
+                                    <li>Jogging di tempat selama 45 detik</li>
+                                    <li>Jumping jack (15 repetisi)</li>
+                                    <li>Skipping / Lompat tali ringan</li>
+                                    <li>Jalan cepat di sekitar ruangan</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-xs text-yellow-300 flex items-start gap-2">
+                                <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                                <span><strong>Prinsip Keselamatan:</strong> Awali dengan pemanasan minimal 5 menit, sediakan air minum, dan hentikan jika merasa pusing atau nyeri sendi.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Timer Box -->
+                    <div class="lg:col-span-6 flex flex-col items-center justify-center">
+                        <div class="w-full max-w-md bg-darkBg/90 border border-sportBlue/40 rounded-3xl p-8 text-center space-y-6 shadow-2xl relative overflow-hidden glow-blue">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-sportBlue/10 rounded-full blur-2xl"></div>
+                            
+                            <div>
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Interactive Timer</span>
+                                <div id="timerDisplay" class="text-6xl lg:text-7xl font-black text-neonGreen tracking-tighter my-3 font-mono">00:45</div>
+                                <p id="timerStatus" class="text-xs text-gray-400">Siap untuk memulai latihan?</p>
+                            </div>
+
+                            <!-- Timer Controls -->
+                            <div class="flex items-center justify-center gap-3">
+                                <button onclick="startTimer()" id="btnStartTimer" class="px-6 py-3 bg-neonGreen hover:bg-emerald-400 text-darkBg font-black rounded-xl text-sm transition shadow-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-play"></i> Mulai
+                                </button>
+                                <button onclick="pauseTimer()" class="px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500 text-yellow-400 hover:text-darkBg font-black rounded-xl text-sm transition border border-yellow-500/30 flex items-center gap-2">
+                                    <i class="fa-solid fa-pause"></i> Jeda
+                                </button>
+                                <button onclick="resetTimer()" class="px-6 py-3 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-black rounded-xl text-sm transition border border-red-500/30 flex items-center gap-2">
+                                    <i class="fa-solid fa-rotate-right"></i> Ulangi
+                                </button>
+                            </div>
+
+                            <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-400">
+                                <span>Durasi Latihan: <strong class="text-white">45 Detik</strong></span>
+                                <button onclick="completeTrainingSession()" class="text-neonGreen hover:underline font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-check"></i> Selesai & Klaim +15 XP
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 5. FITNESS TEST TAB ==================== -->
+        <section id="tab-fitness-test" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-red-500/20 text-red-400 rounded-2xl border border-red-500/20 text-2xl">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Menu Fitness Test: Ukur Kebugaranmu!</h2>
+                            <p class="text-xs text-gray-400">Masukkan hasil pengukuran kebugaran mandiri kamu. Data ini digunakan untuk melihat perkembangan kemampuan fisik secara berkala.</p>
+                        </div>
+                    </div>
+                    <button onclick="saveFitnessTestData()" class="px-5 py-2.5 bg-sportBlue hover:bg-blue-600 text-white font-bold rounded-xl text-xs transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Hasil Tes
+                    </button>
+                </div>
+
+                <!-- Test Form Inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <!-- 1. Cardio Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Cardio</span>
+                            <i class="fa-solid fa-running text-blue-400"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Multistage Fitness (Beep Test)</h3>
+                        <p class="text-[11px] text-gray-400">Ukur daya tahan jantung paru. Masukkan level & shuttle terakhir.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Hasil (Level.Shuttle, cth: 4.5)</label>
+                            <input type="text" id="testCardio" placeholder="Contoh: 4.5" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                    <!-- 2. Push Up Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neonGreen/20 text-neonGreen">Kekuatan Otot Lengan</span>
+                            <i class="fa-solid fa-dumbbell text-neonGreen"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Push-up Test (1 Menit)</h3>
+                        <p class="text-[11px] text-gray-400">Jumlah push-up benar sesuai protokol tes.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Jumlah Repetisi</label>
+                            <input type="number" id="testPushup" placeholder="Contoh: 25" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                    <!-- 3. Sit Up Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400">Kekuatan Otot Perut</span>
+                            <i class="fa-solid fa-child text-purple-400"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Sit-up Test (1 Menit)</h3>
+                        <p class="text-[11px] text-gray-400">Jumlah sit-up benar sesuai protokol.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Jumlah Repetisi</label>
+                            <input type="number" id="testSitup" placeholder="Contoh: 30" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                    <!-- 4. Flexibility Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Kelentukan</span>
+                            <i class="fa-solid fa-child-reaching text-emerald-400"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Sit and Reach</h3>
+                        <p class="text-[11px] text-gray-400">Pengukuran fleksibilitas punggung & tungkai.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Hasil (cm)</label>
+                            <input type="number" id="testFlex" placeholder="Contoh: 18" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                    <!-- 5. Speed Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">Kecepatan</span>
+                            <i class="fa-solid fa-bolt text-yellow-400"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Sprint 30 Meter</h3>
+                        <p class="text-[11px] text-gray-400">Waktu tempuh lari cepat.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Waktu (Detik, cth: 5.2)</label>
+                            <input type="text" id="testSpeed" placeholder="Contoh: 5.2" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                    <!-- 6. Agility Test -->
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">Kelincahan</span>
+                            <i class="fa-solid fa-arrows-split-up-and-left text-red-400"></i>
+                        </div>
+                        <h3 class="font-extrabold text-sm text-white">Shuttle Run</h3>
+                        <p class="text-[11px] text-gray-400">Waktu lari bolak-balik 4x10 meter.</p>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Waktu (Detik, cth: 10.5)</label>
+                            <input type="text" id="testAgility" placeholder="Contoh: 10.5" class="w-full bg-darkCard border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sportBlue">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Note on Standards -->
+                <div class="p-4 bg-sportBlue/10 border border-sportBlue/30 rounded-2xl flex items-start gap-3">
+                    <i class="fa-solid fa-circle-info text-sportBlue text-base mt-0.5"></i>
+                    <div class="text-xs text-gray-300 leading-relaxed">
+                        <strong class="text-white">Catatan Pengukuran:</strong> Hasil pengukuran di atas dicatat sebagai data latihan mandiri siswa. Sesuai prinsip inklusif dan objektif, fokus utama adalah peningkatan kemampuan pribadi (personal progress) dari waktu ke waktu, bukan perbandingan kondisi fisik antarindividu.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 6. DAILY FITNESS MISSION TAB ==================== -->
+        <section id="tab-daily-mission" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-emerald-500/20 text-emerald-400 rounded-2xl border border-emerald-500/30 text-2xl">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Menu Daily Fitness Mission & Healthy Habits</h2>
+                            <p class="text-xs text-gray-400">Centang tantangan aktivitas fisik harian dan kebiasaan sehatmu untuk mengumpulkan poin XP!</p>
+                        </div>
+                    </div>
+                    <div class="bg-darkBg px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-neonGreen">
+                        Misi Selesai: <span id="completedMissionCount">0</span> / 12
+                    </div>
+                </div>
+
+                <!-- Mission Checklist Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="missionListContainer">
+                    <!-- Dynamically populated via JS for clean check states -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 7. QUIZ CHALLENGE TAB ==================== -->
+        <section id="tab-quiz" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-purple-500/20 text-purple-400 rounded-2xl border border-purple-500/30 text-2xl">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Menu Quiz Challenge: Uji Pengetahuanmu!</h2>
+                            <p class="text-xs text-gray-400">15 Soal Pilihan Ganda Berbasis HOTS (C4–C5) seputar kebugaran jasmani & gaya hidup sehat.</p>
+                        </div>
+                    </div>
+                    <div id="quizScoreBadge" class="hidden bg-neonGreen/10 border border-neonGreen/30 px-4 py-2 rounded-xl text-xs font-bold text-neonGreen">
+                        Skor Kuis: <span id="finalQuizScore">0</span> / 15
+                    </div>
+                </div>
+
+                <!-- Quiz Container -->
+                <div id="quizCardContainer" class="bg-darkBg/80 border border-white/10 rounded-2xl p-6 lg:p-8 space-y-6">
+                    <div class="flex items-center justify-between text-xs text-gray-400 border-b border-white/10 pb-3">
+                        <span>Pertanyaan <strong id="currentQuizNum" class="text-neonGreen">1</strong> dari 15</span>
+                        <span id="quizCategoryTag" class="px-2.5 py-1 bg-sportBlue/20 text-sportBlue rounded-full font-bold">Cardiorespiratory</span>
+                    </div>
+
+                    <h3 id="quizQuestionText" class="text-base lg:text-lg font-extrabold text-white leading-relaxed">
+                        Memuat pertanyaan kuis...
+                    </h3>
+
+                    <div class="grid grid-cols-1 gap-3" id="quizOptionsContainer">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <div id="quizExplanationBox" class="hidden p-4 rounded-xl text-xs border bg-darkCard/90 space-y-2">
+                        <p class="font-bold flex items-center gap-1.5" id="quizResultTitle"><i class="fa-solid fa-circle-check"></i> Benar!</p>
+                        <p class="text-gray-300 leading-relaxed" id="quizExplanationText">Penjelasan...</p>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-white/10">
+                        <button onclick="nextQuizQuestion()" id="btnNextQuiz" class="hidden px-6 py-3 bg-sportBlue hover:bg-blue-600 text-white font-bold rounded-xl text-xs transition shadow flex items-center gap-2">
+                            Pertanyaan Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Restart / Completed Screen -->
+                <div id="quizCompletedScreen" class="hidden text-center py-12 space-y-6">
+                    <div class="w-20 h-20 mx-auto rounded-3xl bg-neonGreen/20 text-neonGreen border border-neonGreen/30 flex items-center justify-center text-4xl shadow-xl">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-white">Kuis Selesai Diselesaikan!</h3>
+                    <p id="quizCompletedSummary" class="text-sm text-gray-300 max-w-md mx-auto">Kamu telah menjawab seluruh 15 soal kuis HOTS kebugaran jasmani.</p>
+                    <button onclick="restartQuiz()" class="px-6 py-3 bg-sportBlue hover:bg-blue-600 text-white font-bold rounded-xl text-xs transition shadow">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Ulangi Kuis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 8. REFLEKSI TAB ==================== -->
+        <section id="tab-refleksi" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+                    <div class="p-3 bg-orange-500/20 text-orange-400 rounded-2xl border border-orange-500/30 text-2xl">
+                        <i class="fa-solid fa-comment-dots"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white">Menu Refleksi: My Fitness Journey</h2>
+                        <p class="text-xs text-gray-400">Renungkan pengalaman belajar dan aktivitas fisikmu hari ini melalui kolom refleksi di bawah.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 max-w-3xl">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-300">1. Komponen kebugaran apa yang menurutmu paling perlu ditingkatkan dan mengapa?</label>
+                        <textarea id="ref1" rows="2" placeholder="Tuliskan refleksimu di sini..." class="w-full bg-darkBg border border-white/20 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neonGreen"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-300">2. Aktivitas fisik atau latihan apa yang paling kamu sukai selama pembelajaran ini?</label>
+                        <textarea id="ref2" rows="2" placeholder="Tuliskan refleksimu di sini..." class="w-full bg-darkBg border border-white/20 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neonGreen"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-300">3. Apa kesulitan atau tantangan yang kamu alami saat berlatih, dan bagaimana cara mengatasinya?</label>
+                        <textarea id="ref3" rows="2" placeholder="Tuliskan refleksimu di sini..." class="w-full bg-darkBg border border-white/20 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neonGreen"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-300">4. Kebiasaan sehat apa (misal: tidur cukup, minum air putih, jalan kaki) yang akan kamu mulai atau tingkatkan mulai hari ini?</label>
+                        <textarea id="ref4" rows="2" placeholder="Tuliskan refleksimu di sini..." class="w-full bg-darkBg border border-white/20 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neonGreen"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-300">5. Bagaimana cara kamu menjaga konsistensi berolahraga di tengah kesibukan belajar di sekolah?</label>
+                        <textarea id="ref5" rows="2" placeholder="Tuliskan refleksimu di sini..." class="w-full bg-darkBg border border-white/20 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-neonGreen"></textarea>
+                    </div>
+
+                    <button onclick="saveReflection()" class="px-6 py-3 bg-neonGreen text-darkBg font-black rounded-xl text-xs transition shadow hover:bg-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> SIMPAN REFLEKSI (+30 XP)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 9. REPORT TAB ==================== -->
+        <section id="tab-report" class="tab-content hidden space-y-6">
+            <div class="bg-darkCard border border-sportBlue/30 rounded-3xl p-6 lg:p-8 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-yellow-500/20 text-yellow-400 rounded-2xl border border-yellow-500/30 text-2xl">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black text-white">Menu Hasil Belajar: My Fitness Report</h2>
+                            <p class="text-xs text-gray-400">Ringkasan aktivitas pembelajaran, skor kuis, pencapaian XP, dan penghargaan digital kamu.</p>
+                        </div>
+                    </div>
+                    <button onclick="window.print()" class="px-4 py-2 bg-sportBlue hover:bg-blue-600 text-white font-bold rounded-xl text-xs transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> Cetak Laporan
+                    </button>
+                </div>
+
+                <!-- Report Card Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-2">
+                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Identitas Siswa</span>
+                        <h3 id="reportName" class="text-lg font-extrabold text-white">Siswa</h3>
+                        <p id="reportClass" class="text-xs text-neonGreen font-semibold">Kelas IX</p>
+                    </div>
+
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-2">
+                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Level & Total XP</span>
+                        <h3 class="text-lg font-extrabold text-neonGreen"><span id="reportLevel">1</span> (<span id="reportXP">0</span> XP)</h3>
+                        <p id="reportRankTitle" class="text-xs text-gray-300">Fitness Beginner</p>
+                    </div>
+
+                    <div class="bg-darkBg/80 border border-white/10 rounded-2xl p-5 space-y-2">
+                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Pencapaian Aktivitas</span>
+                        <h3 class="text-lg font-extrabold text-blue-400"><span id="reportCompletedMissions">0</span> Misi Selesai</h3>
+                        <p class="text-xs text-gray-300">Skor Kuis: <strong id="reportQuizScore" class="text-white">0</strong> / 15</p>
+                    </div>
+                </div>
+
+                <!-- Digital Badges Awarded -->
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-medal text-yellow-400"></i> Penghargaan Digital (Digital Badges)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="badgesContainer">
+                        <!-- Badges injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Summary Quote -->
+                <div class="p-6 bg-gradient-to-r from-sportBlue/20 via-sportNavy to-emerald-500/20 border border-sportBlue/40 rounded-2xl text-center space-y-2">
+                    <h4 class="font-black text-base text-white">Pesan Utama Pembelajaran PJOK</h4>
+                    <p class="text-xs text-gray-300 italic max-w-xl mx-auto">
+                        "Kebugaran bukan tentang siapa yang paling kuat, tetapi tentang bagaimana kita terus berusaha menjadi lebih sehat, aktif, dan bugar setiap hari."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-darkCard/80 border-t border-white/10 py-4 px-6 text-center text-xs text-gray-400 mt-12">
+        <p>FIT & ACTIVE CHALLENGE – Media Pembelajaran Interaktif PJOK Kelas IX SMP | Berbasis Gamifikasi & Deep Learning</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* --- APPLICATION STATE --- */
+        let state = {
+            studentName: "",
+            studentClass: "IX-A",
+            xp: 0,
+            level: 1,
+            completedMissions: {},
+            fitnessTestData: {},
+            quizAnswers: {},
+            currentQuizIndex: 0,
+            reflectionData: {},
+            timerInterval: null,
+            timerSeconds: 45,
+            isTimerRunning: false,
+            soundEnabled: true
+        };
+
+        /* --- SOUND EFFECTS SYSTEM (Tone.js) --- */
+        let synth = null;
+        async function initAudio() {
+            if (!synth && typeof Tone !== 'undefined') {
+                await Tone.start();
+                synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.volume.value = -8;
+            }
+        }
+
+        function playSound(type) {
+            if (!state.soundEnabled) return;
+            initAudio().then(() => {
+                if (!synth) return;
+                const now = Tone.now();
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "32n", now);
+                } else if (type === 'success' || type === 'xp') {
+                    synth.triggerAttackRelease("C5", "16n", now);
+                    synth.triggerAttackRelease("E5", "16n", now + 0.08);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.16);
+                } else if (type === 'error') {
+                    synth.triggerAttackRelease("E3", "16n", now);
+                    synth.triggerAttackRelease("C3", "8n", now + 0.12);
+                } else if (type === 'tick') {
+                    synth.triggerAttackRelease("A4", "64n", now);
+                } else if (type === 'alarm') {
+                    synth.triggerAttackRelease("C5", "16n", now);
+                    synth.triggerAttackRelease("G5", "16n", now + 0.15);
+                    synth.triggerAttackRelease("C6", "8n", now + 0.3);
+                }
+            }).catch(() => {});
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const btn = document.getElementById('btnSoundToggle');
+            if (state.soundEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                btn.classList.add('text-neonGreen');
+                btn.classList.remove('text-gray-400');
+                playSound('click');
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+                btn.classList.remove('text-neonGreen');
+                btn.classList.add('text-gray-400');
+            }
+        }
+
+        // 15 HOTS Quiz Questions Data
+        const quizQuestions = [
+            {
+                category: "Cardiorespiratory Endurance",
+                question: "Raka sering merasa cepat lelah ketika bermain sepak bola. Ia ingin meningkatkan kemampuan tubuh agar mampu berlari lebih lama tanpa cepat kelelahan. Jenis latihan yang paling tepat untuk Raka adalah ...",
+                options: [
+                    "A. Push-up secara rutin setiap hari",
+                    "B. Jogging secara teratur dan aerobik",
+                    "C. Sit and reach untuk kelentukan",
+                    "D. Sprint 10 meter dengan kecepatan maksimal"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Jogging dan latihan aerobik teratur meningkatkan kapasitas daya tahan jantung dan paru-paru (cardiorespiratory endurance) sehingga pasokan oksigen ke otot lebih efisien dan tidak mudah lelah."
+            },
+            {
+                category: "Muscular Strength",
+                question: "Siti ingin memperkuat otot lengan dan bahunya agar lebih kuat saat melakukan berbagai aktivitas fisik. Bentuk latihan beban tubuh (calisthenics) yang paling tepat adalah ...",
+                options: [
+                    "A. Sit and reach",
+                    "B. Push-up dengan teknik benar",
+                    "C. Shuttle run 4x10 meter",
+                    "D. Lari akselerasi jarak pendek"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Push-up adalah latihan beban tubuh (calisthenics) efektif untuk melatih kekuatan otot lengan, dada, dan bahu (muscular strength)."
+            },
+            {
+                category: "Flexibility",
+                question: "Sebelum melakukan pertandingan bola basket, guru PJOK selalu menginstruksikan murid melakukan peregangan statis dan dinamis. Tujuan utama peregangan ini adalah ...",
+                options: [
+                    "A. Menambah berat badan secara instan",
+                    "B. Meningkatkan kelentukan dan mencegah cedera sendi",
+                    "C. Mengurangi denyut nadi menjadi sangat rendah",
+                    "D. Menghilangkan kebutuhan minum air"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Peregangan meningkatkan luas gerak sendi (flexibility) dan mempersiapkan otot serta sendi agar terhindar dari cedera."
+            },
+            {
+                category: "Agility",
+                question: "Dalam permainan bola basket atau sepak bola, seorang pemain harus mampu mengubah arah lari secara cepat saat mengejar bola. Komponen kebugaran jasmani yang paling dominan dalam situasi ini adalah ...",
+                options: [
+                    "A. Kelincahan (Agility)",
+                    "B. Kekuatan statis",
+                    "C. Daya tahan jantung paru",
+                    "D. Kelentukan sendi pinggang"
+                ],
+                answer: 0,
+                explanation: "Jawaban A benar. Kelincahan (agility) adalah kemampuan tubuh mengubah arah secara cepat dan tepat tanpa kehilangan keseimbangan."
+            },
+            {
+                category: "Daily Habits & Hydration",
+                question: "Budi sering merasa lesu dan konsentrasi belajarnya menurun di siang hari, serta jarang minum air putih saat beraktivitas di sekolah. Kebiasaan sehat apa yang paling tepat untuk diperbaiki?",
+                options: [
+                    "A. Menambah waktu duduk di depan gawai",
+                    "B. Mencukupi kebutuhan hidrasi air putih dan istirahat",
+                    "C. Melakukan lari marathon 10 km setiap jam",
+                    "D. Mengurangi durasi tidur malam hingga 3 jam"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Hidrasi yang cukup dengan air putih serta istirahat teratur sangat penting untuk menjaga metabolisme tubuh dan konsentrasi."
+            },
+            {
+                category: "Muscular Endurance",
+                question: "Mengapa melakukan sit-up berulang kali dalam waktu 1 menit melatih daya tahan otot perut (muscular endurance), bukan hanya kekuatan sesaat?",
+                options: [
+                    "A. Karena dilakukan dalam waktu lama dengan kontraksi berulang",
+                    "B. Karena tidak memerlukan tenaga sama sekali",
+                    "C. Karena hanya melatih persendian kaki",
+                    "D. Karena menurunkan detak jantung secara drastis"
+                ],
+                answer: 0,
+                explanation: "Jawaban A benar. Daya tahan otot melibatkan kemampuan otot berkontraksi secara berulang dalam jangka waktu tertentu tanpa cepat lelah."
+            },
+            {
+                category: "Speed",
+                question: "Seorang pelari jarak pendek (sprint) memerlukan komponen kebugaran utama berupa kecepatan (speed). Bentuk latihan yang paling relevan adalah ...",
+                options: [
+                    "A. Lari pelan sejauh 5 kilometer",
+                    "B. Sprint 30 meter dengan reaksi cepat",
+                    "C. Duduk bersila dalam waktu lama",
+                    "D. Peregangan otot leher"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Sprint 30 meter secara maksimal melatih kecepatan perpindahan gerak dalam waktu singkat."
+            },
+            {
+                category: "Safety & Warm-up",
+                question: "Apa akibat yang paling sering terjadi jika seseorang langsung melakukan latihan inti berintensitas tinggi tanpa melakukan pemanasan (warming-up) terlebih dahulu?",
+                options: [
+                    "A. Tubuh menjadi sangat bugar seketika",
+                    "B. Otot kaku, kram, dan berisiko tinggi mengalami cedera",
+                    "C. Peningkatan konsentrasi belajar yang drastis",
+                    "D. Penurunan suhu tubuh secara drastis"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Pemanasan meningkatkan suhu tubuh dan elastisitas otot. Tanpa pemanasan, otot rentan mengalami kram dan cedera."
+            },
+            {
+                category: "Sedentary Lifestyle",
+                question: "Dampak negatif dari kebiasaan duduk terlalu lama (sedentary lifestyle) bagi remaja SMP adalah ...",
+                options: [
+                    "A. Meningkatkan kekuatan otot secara otomatis",
+                    "B. Menurunkan kebugaran jasmani dan kaku pada persendian",
+                    "C. Mempercepat pertumbuhan tinggi badan",
+                    "D. Meningkatkan kapasitas paru-paru"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Duduk terlalu lama tanpa aktivitas fisik membuat otot melemah, sirkulasi darah terhambat, dan menurunkan kebugaran."
+            },
+            {
+                category: "Principle of Training",
+                question: "Prinsip latihan kebugaran jasmani yang benar menyatakan bahwa peningkatan beban atau intensitas latihan harus dilakukan secara ...",
+                options: [
+                    "A. Mendadak tanpa persiapan dan berlebihan",
+                    "B. Bertahap (progressive) sesuai kemampuan tubuh",
+                    "C. Sekali sebulan dengan durasi 5 jam",
+                    "D. Tanpa aturan dan istirahat"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Prinsip latihan harus bersifat bertahap (progressive overload) agar tubuh beradaptasi dengan baik tanpa cedera."
+            },
+            {
+                category: "Cardiorespiratory",
+                question: "Aktivitas harian seperti naik turun tangga di gedung sekolah secara rutin dapat melatih komponen kebugaran ...",
+                options: [
+                    "A. Daya tahan jantung dan paru-paru serta kekuatan kaki",
+                    "B. Kelenturan jari tangan",
+                    "C. Kecepatan lemparan bola",
+                    "D. Kekuatan otot leher"
+                ],
+                answer: 0,
+                explanation: "Jawaban A benar. Naik turun tangga melibatkan kerja otot tungkai dan menuntut kerja sistem kardiorespirasi yang baik."
+            },
+            {
+                category: "Rest & Recovery",
+                question: "Mengapa waktu tidur yang cukup (7-8 jam sehari) sangat penting bagi remaja yang aktif berolahraga?",
+                options: [
+                    "A. Agar tubuh mengalami pemulihan (recovery) dan pertumbuhan otot yang optimal",
+                    "B. Agar tidak perlu masuk sekolah keesokan harinya",
+                    "C. Agar denyut nadi berhenti berdetak",
+                    "D. Agar berat badan naik drastis"
+                ],
+                answer: 0,
+                explanation: "Jawaban A benar. Tidur cukup adalah waktu utama bagi tubuh untuk melakukan sintesis protein otot, pemulihan energi, dan regenerasi sel."
+            },
+            {
+                category: "Agility Test",
+                question: "Tes kebugaran jasmani yang digunakan khusus untuk mengukur kecepatan dan kelincahan mengubah arah (shuttle run) dilakukan dengan jarak ...",
+                options: [
+                    "A. 100 kilometer",
+                    "B. 4 x 10 meter bolak-balik",
+                    "C. 1000 meter lari santai",
+                    "D. 50 meter lurus sekali jalan"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Shuttle run umumnya dilakukan dengan jarak 4 x 10 meter bolak-balik secepat mungkin."
+            },
+            {
+                category: "Holistic Health",
+                question: "Sikap mental yang tepat ketika melakukan pengukuran kebugaran jasmani di sekolah adalah ...",
+                options: [
+                    "A. Membandingkan dan mengejek teman yang hasil tesnya rendah",
+                    "B. Berusaha jujur dan fokus pada peningkatan kemampuan diri sendiri",
+                    "C. Memanipulasi hasil pencatatan agar terlihat sempurna",
+                    "D. Menolak mengikuti seluruh rangkaian tes"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Fokus utama kebugaran adalah perkembangan diri sendiri (personal progress) dengan jujur dan sportif."
+            },
+            {
+                category: "Physical Activity",
+                question: "Bentuk aktivitas fisik rekreasi akhir pekan yang paling baik untuk menjaga kesehatan jantung dan kebugaran bersama keluarga adalah ...",
+                options: [
+                    "A. Duduk bermain gawai selama 10 jam",
+                    "B. Bersepeda santai bersama atau jalan pagi di taman",
+                    "C. Tidur sepanjang hari tanpa bergerak",
+                    "D. Menonton televisi sambil makan makanan cepat saji"
+                ],
+                answer: 1,
+                explanation: "Jawaban B benar. Bersepeda santai atau jalan pagi adalah aktivitas fisik aerobik yang menyenangkan dan menyehatkan."
+            }
+        ];
+
+        // Daily Missions Data
+        const dailyMissionsData = [
+            { id: 1, title: "Senin: Jalan kaki / jalan cepat selama 15 menit", xp: 15 },
+            { id: 2, title: "Selasa: Melakukan 10–15 squat sesuai kemampuan", xp: 15 },
+            { id: 3, title: "Rabu: Melakukan peregangan (stretching) 5–10 menit", xp: 15 },
+            { id: 4, title: "Kamis: Melakukan jumping jack 20 repetisi", xp: 15 },
+            { id: 5, title: "Jumat: Bersepeda atau bermain permainan aktif", xp: 20 },
+            { id: 6, title: "Sabtu: Jogging ringan atau olahraga bersama teman", xp: 20 },
+            { id: 7, title: "Minggu: Aktivitas keluarga & pemulihan aktif", xp: 20 },
+            { id: 8, title: "Kebiasaan: Minum air putih cukup (minimal 8 gelas)", xp: 10 },
+            { id: 9, title: "Kebiasaan: Tidur teratur & cukup (7-8 jam)", xp: 10 },
+            { id: 10, title: "Kebiasaan: Mengurangi waktu duduk terlalu lama", xp: 10 },
+            { id: 11, title: "Kebiasaan: Batasi penggunaan gawai tak perlu", xp: 10 },
+            { id: 12, title: "Kebiasaan: Mengonsumsi makanan bergizi seimbang", xp: 10 }
+        ];
+
+        /* --- INITIALIZATION & NAVIGATION --- */
+        window.onload = function() {
+            renderMissions();
+            renderQuizQuestion();
+            updateDisplayStats();
+        };
+
+        function startAdventure() {
+            const nameInput = document.getElementById('inputName').value.trim();
+            const classInput = document.getElementById('inputClass').value;
+
+            if (!nameInput) {
+                playSound('error');
+                showModal("Perhatian", "Silakan masukkan nama lengkap terlebih dahulu sebelum memulai petualangan!");
+                return;
+            }
+
+            playSound('success');
+            state.studentName = nameInput;
+            state.studentClass = classInput;
+
+            document.getElementById('navStudentName').innerText = state.studentName;
+            document.getElementById('navStudentClass').innerText = state.studentClass;
+            document.getElementById('reportName').innerText = state.studentName;
+            document.getElementById('reportClass').innerText = state.studentClass;
+
+            // Show headers & switch to apersepsi or materi
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainNav').classList.remove('hidden');
+
+            addXP(25); // Welcome bonus XP
+            switchTab('apersepsi');
+            showModal("Selamat Datang!", `Halo ${state.studentName} (${state.studentClass})! Selamat bergabung di FIT & ACTIVE CHALLENGE. +25 XP bonus pendaftaran ditambahkan!`);
+        }
+
+        /* --- SWITCH STUDENT & EXIT HANDLERS --- */
+        function openSwitchStudentModal() {
+            playSound('click');
+            document.getElementById('confirmIcon').innerHTML = '<i class="fa-solid fa-user-pen text-amber-400"></i>';
+            document.getElementById('confirmTitle').innerText = 'Ganti Identitas Siswa?';
+            document.getElementById('confirmMessage').innerText = 'Progres sesi saat ini akan direset dan Anda akan kembali ke halaman awal untuk memasukkan nama siswa baru.';
+            document.getElementById('btnConfirmProceed').className = 'flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-darkBg font-bold rounded-xl transition text-xs shadow-lg';
+            document.getElementById('btnConfirmProceed').innerText = 'Ya, Ganti Siswa';
+            document.getElementById('btnConfirmProceed').onclick = performSwitchStudent;
+            document.getElementById('confirmActionModal').classList.remove('hidden');
+        }
+
+        function performSwitchStudent() {
+            playSound('click');
+            closeConfirmModal();
+            pauseTimer();
+            state.xp = 0;
+            state.level = 1;
+            state.completedMissions = {};
+            state.fitnessTestData = {};
+            state.reflectionData = {};
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('inputName').value = '';
+            document.getElementById('mainHeader').classList.add('hidden');
+            document.getElementById('mainNav').classList.add('hidden');
+            updateDisplayStats();
+            renderMissions();
+            restartQuiz();
+            switchTab('welcome');
+        }
+
+        function openExitModal() {
+            playSound('click');
+            document.getElementById('confirmIcon').innerHTML = '<i class="fa-solid fa-right-from-bracket text-red-400"></i>';
+            document.getElementById('confirmTitle').innerText = 'Keluar dari Aplikasi?';
+            document.getElementById('confirmMessage').innerText = 'Apakah Anda yakin ingin mengakhiri sesi pembelajaran FIT & ACTIVE CHALLENGE sekarang?';
+            document.getElementById('btnConfirmProceed').className = 'flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition text-xs shadow-lg';
+            document.getElementById('btnConfirmProceed').innerText = 'Ya, Keluar';
+            document.getElementById('btnConfirmProceed').onclick = performExitApp;
+            document.getElementById('confirmActionModal').classList.remove('hidden');
+        }
+
+        function performExitApp() {
+            playSound('click');
+            closeConfirmModal();
+            pauseTimer();
+            document.getElementById('exitScreenOverlay').classList.remove('hidden');
+        }
+
+        function restartFromExit() {
+            playSound('success');
+            document.getElementById('exitScreenOverlay').classList.add('hidden');
+            performSwitchStudent();
+        }
+
+        function closeConfirmModal() {
+            playSound('click');
+            document.getElementById('confirmActionModal').classList.add('hidden');
+        }
+
+        function switchTab(tabId) {
+            playSound('click');
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Show target tab
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sportBlue', 'text-white', 'shadow-lg');
+                btn.classList.add('text-gray-300', 'hover:bg-white/5', 'hover:text-white');
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.remove('text-gray-300', 'hover:bg-white/5', 'hover:text-white');
+                    btn.classList.add('bg-sportBlue', 'text-white', 'shadow-lg');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (tabId === 'report') {
+                updateReportData();
+            }
+        }
+
+        /* --- XP & LEVEL SYSTEM --- */
+        function addXP(amount) {
+            state.xp += amount;
+            // Level calculation: Every 100 XP = 1 Level
+            state.level = Math.floor(state.xp / 100) + 1;
+            updateDisplayStats();
+            playSound('xp');
+        }
+
+        function updateDisplayStats() {
+            document.getElementById('displayXP').innerText = state.xp;
+            document.getElementById('displayLevel').innerText = state.level;
+            document.getElementById('reportXP').innerText = state.xp;
+            document.getElementById('reportLevel').innerText = state.level;
+
+            // Rank Title
+            let rankTitle = "Fitness Beginner";
+            if (state.level >= 4) rankTitle = "Healthy Lifestyle Champion";
+            else if (state.level >= 3) rankTitle = "Fitness Explorer";
+            else if (state.level >= 2) rankTitle = "Active Learner";
+
+            document.getElementById('reportRankTitle').innerText = rankTitle;
+        }
+
+        /* --- MODAL DIALOG --- */
+        function showModal(title, message) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            playSound('click');
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function openApersepsiModal(topic, desc) {
+            showModal(`Konsep Apersepsi: ${topic}`, desc);
+            addXP(5);
+        }
+
+        /* --- MATERI FILTER --- */
+        function filterMateri(category) {
+            document.querySelectorAll('.materi-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sportBlue', 'text-white');
+                btn.classList.add('bg-darkBg', 'text-gray-300');
+                if (btn.getAttribute('data-filter') === category) {
+                    btn.classList.remove('bg-darkBg', 'text-gray-300');
+                    btn.classList.add('bg-sportBlue', 'text-white');
+                }
+            });
+
+            document.querySelectorAll('.materi-item').forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function openTrainingPos(posName, exercises) {
+            switchTab('training');
+            document.getElementById('trainingPosSelect').value = posName;
+            changeTrainingPos();
+            showModal("Menuju Training Zone", `Berpindah ke ${posName}. Siapkan diri dan ikuti panduan timer latihan!`);
+        }
+
+        /* --- TRAINING ZONE TIMER --- */
+        function changeTrainingPos() {
+            const selectVal = document.getElementById('trainingPosSelect').value;
+            document.getElementById('activePosTitle').innerText = selectVal;
+            
+            let desc = "Latihan fisik terstruktur untuk meningkatkan komponen kebugaran.";
+            let exercisesHTML = "<li>Gerakan sesuai protokol latihan</li><li>Jaga teknik dan pernapasan</li>";
+
+            if (selectVal.includes('Cardio')) {
+                desc = "Latihan kardiorespirasi meningkatkan denyut jantung dan kapasitas paru-paru.";
+                exercisesHTML = "<li>Jogging di tempat (45 detik)</li><li>Jumping jack (15 repetisi)</li><li>Skipping / lompat tali ringan</li><li>Jalan cepat</li>";
+            } else if (selectVal.includes('Strength')) {
+                desc = "Latihan kekuatan otot (muscular strength) membangun tenaga dan postur tubuh.";
+                exercisesHTML = "<li>Push-up dengan lutut/penuh</li><li>Squat tegak lurus</li><li>Plank tahan posisi</li><li>Lunges bergantian</li>";
+            } else if (selectVal.includes('Endurance')) {
+                desc = "Latihan daya tahan otot untuk mencegah kelelahan berulang.";
+                exercisesHTML = "<li>Sit-up sesuai kemampuan</li><li>Squat berulang ritmis</li><li>Push-up sesuai kapasitas</li>";
+            } else if (selectVal.includes('Flexibility')) {
+                desc = "Latihan kelentukan untuk luas gerak sendi optimal.";
+                exercisesHTML = "<li>Peregangan statis otot kaki</li><li>Peregangan bahu & lengan</li><li>Sit and reach perlahan</li>";
+            } else if (selectVal.includes('Speed')) {
+                desc = "Latihan kecepatan perpindahan gerak tubuh.";
+                exercisesHTML = "<li>Sprint 30 meter</li><li>Lari akselerasi jarak pendek</li>";
+            } else if (selectVal.includes('Agility')) {
+                desc = "Latihan kelincahan mengubah arah gerak cepat.";
+                exercisesHTML = "<li>Shuttle run (4x10 meter)</li><li>Zig-zag run</li><li>Lari bolak-balik</li>";
+            }
+
+            document.getElementById('activePosDesc').innerText = desc;
+            document.getElementById('activePosExercises').innerHTML = exercisesHTML;
+            resetTimer();
+        }
+
+        function startTimer() {
+            if (state.isTimerRunning) return;
+            playSound('click');
+            state.isTimerRunning = true;
+            document.getElementById('timerStatus').innerText = "Latihan sedang berlangsung... Tetap semangat!";
+            
+            state.timerInterval = setInterval(() => {
+                if (state.timerSeconds > 0) {
+                    state.timerSeconds--;
+                    updateTimerDisplay();
+                    if (state.timerSeconds <= 5 && state.timerSeconds > 0) {
+                        playSound('tick');
+                    }
+                } else {
+                    pauseTimer();
+                    playSound('alarm');
+                    document.getElementById('timerStatus').innerText = "Waktu latihan selesai! Kerja bagus!";
+                    addXP(15);
+                    showModal("Latihan Selesai!", "Hebat! Kamu telah menyelesaikan sesi latihan di pos ini. +15 XP ditambahkan!");
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (state.isTimerRunning) playSound('click');
+            state.isTimerRunning = false;
+            clearInterval(state.timerInterval);
+            document.getElementById('timerStatus').innerText = "Timer dijeda.";
+        }
+
+        function resetTimer() {
+            playSound('click');
+            pauseTimer();
+            state.timerSeconds = 45;
+            updateTimerDisplay();
+            document.getElementById('timerStatus').innerText = "Siap untuk memulai latihan?";
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(state.timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (state.timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+        }
+
+        function completeTrainingSession() {
+            addXP(20);
+            showModal("Sesi Latihan Direkam", "Sesi latihan pos berhasil diselesaikan. +20 XP ditambahkan ke akunmu!");
+        }
+
+        /* --- FITNESS TEST SAVE --- */
+        function saveFitnessTestData() {
+            state.fitnessTestData = {
+                cardio: document.getElementById('testCardio').value,
+                pushup: document.getElementById('testPushup').value,
+                situp: document.getElementById('testSitup').value,
+                flex: document.getElementById('testFlex').value,
+                speed: document.getElementById('testSpeed').value,
+                agility: document.getElementById('testAgility').value
+            };
+            addXP(25);
+            showModal("Berhasil Disimpan!", "Data hasil pengukuran kebugaran berhasil disimpan. +25 XP ditambahkan!");
+        }
+
+        /* --- DAILY MISSIONS --- */
+        function renderMissions() {
+            const container = document.getElementById('missionListContainer');
+            container.innerHTML = "";
+
+            dailyMissionsData.forEach(mission => {
+                const isChecked = state.completedMissions[mission.id] || false;
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-4 rounded-2xl border transition ${isChecked ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-darkBg/80 border-white/10'}`;
+                
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleMission(${mission.id}, ${mission.xp})" class="w-5 h-5 accent-neonGreen rounded cursor-pointer">
+                        <span class="text-xs font-semibold ${isChecked ? 'line-through text-gray-400' : 'text-white'}">${mission.title}</span>
+                    </div>
+                    <span class="text-xs font-bold text-neonGreen px-2.5 py-1 rounded-full bg-neonGreen/10">+${mission.xp} XP</span>
+                `;
+                container.appendChild(div);
+            });
+
+            const completedCount = Object.values(state.completedMissions).filter(Boolean).length;
+            document.getElementById('completedMissionCount').innerText = completedCount;
+        }
+
+        function toggleMission(missionId, xpVal) {
+            if (!state.completedMissions[missionId]) {
+                state.completedMissions[missionId] = true;
+                addXP(xpVal);
+                showModal("Misi Selesai!", `Keren! Misi harian berhasil dicentang. +${xpVal} XP ditambahkan!`);
+            } else {
+                state.completedMissions[missionId] = false;
+            }
+            renderMissions();
+        }
+
+        /* --- QUIZ CHALLENGE --- */
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let answeredCurrent = false;
+
+        function renderQuizQuestion() {
+            if (currentQuizIndex >= quizQuestions.length) {
+                document.getElementById('quizCardContainer').classList.add('hidden');
+                document.getElementById('quizCompletedScreen').classList.remove('hidden');
+                document.getElementById('quizScoreBadge').classList.remove('hidden');
+                document.getElementById('finalQuizScore').innerText = quizScore;
+                document.getElementById('quizCompletedSummary').innerText = `Kamu telah menjawab 15 soal kuis dengan perolehan skor ${quizScore} / 15.`;
+                addXP(quizScore * 5); // 5 XP per correct answer
+                return;
+            }
+
+            answeredCurrent = false;
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('currentQuizNum').innerText = currentQuizIndex + 1;
+            document.getElementById('quizCategoryTag').innerText = q.category;
+            document.getElementById('quizQuestionText').innerText = q.question;
+            document.getElementById('quizExplanationBox').classList.add('hidden');
+            document.getElementById('btnNextQuiz').classList.add('hidden');
+
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            optionsContainer.innerHTML = "";
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border border-white/10 bg-darkCard hover:bg-sportBlue/20 text-xs text-gray-200 transition font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-solid fa-chevron-right text-gray-500 text-xs"></i>`;
+                btn.onclick = () => submitQuizAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function submitQuizAnswer(selectedIdx, btnElement) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const q = quizQuestions[currentQuizIndex];
+            const options = document.getElementById('quizOptionsContainer').children;
+
+            if (selectedIdx === q.answer) {
+                quizScore++;
+                playSound('success');
+                btnElement.classList.remove('bg-darkCard', 'hover:bg-sportBlue/20');
+                btnElement.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-300');
+                document.getElementById('quizResultTitle').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Jawaban Benar!`;
+                document.getElementById('quizExplanationBox').className = "p-4 rounded-xl text-xs border bg-emerald-500/10 border-emerald-500/30 space-y-2";
+            } else {
+                playSound('error');
+                btnElement.classList.remove('bg-darkCard', 'hover:bg-sportBlue/20');
+                btnElement.classList.add('bg-red-500/20', 'border-red-500', 'text-red-300');
+                // Highlight correct option
+                options[q.answer].classList.remove('bg-darkCard');
+                options[q.answer].classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-300');
+
+                document.getElementById('quizResultTitle').innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400"></i> Jawaban Kurang Tepat`;
+                document.getElementById('quizExplanationBox').className = "p-4 rounded-xl text-xs border bg-red-500/10 border-red-500/30 space-y-2";
+            }
+
+            document.getElementById('quizExplanationText').innerText = q.explanation;
+            document.getElementById('quizExplanationBox').classList.remove('hidden');
+            document.getElementById('btnNextQuiz').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            renderQuizQuestion();
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quizCardContainer').classList.remove('hidden');
+            document.getElementById('quizCompletedScreen').classList.add('hidden');
+            renderQuizQuestion();
+        }
+
+        /* --- REFLEKSI --- */
+        function saveReflection() {
+            state.reflectionData = {
+                ref1: document.getElementById('ref1').value,
+                ref2: document.getElementById('ref2').value,
+                ref3: document.getElementById('ref3').value,
+                ref4: document.getElementById('ref4').value,
+                ref5: document.getElementById('ref5').value
+            };
+            addXP(30);
+            showModal("Refleksi Disimpan!", "Refleksi perjalanan kebugaranmu berhasil disimpan. +30 XP ditambahkan!");
+        }
+
+        /* --- REPORT & BADGES --- */
+        function updateReportData() {
+            const completedMissionsCount = Object.values(state.completedMissions).filter(Boolean).length;
+            document.getElementById('reportCompletedMissions').innerText = completedMissionsCount;
+            document.getElementById('reportQuizScore').innerText = quizScore;
+
+            // Badges calculation
+            const badgesContainer = document.getElementById('badgesContainer');
+            badgesContainer.innerHTML = "";
+
+            const badges = [
+                {
+                    title: "Bronze Fitness Explorer",
+                    desc: "Menyelesaikan pendaftaran, apersepsi, dan membaca materi.",
+                    unlocked: state.xp >= 50,
+                    icon: "fa-medal",
+                    color: "text-amber-600 border-amber-600/30 bg-amber-600/10"
+                },
+                {
+                    title: "Silver Active Student",
+                    desc: "Menyelesaikan sesi latihan training zone & misi harian.",
+                    unlocked: state.xp >= 150,
+                    icon: "fa-award",
+                    color: "text-slate-300 border-slate-300/30 bg-slate-300/10"
+                },
+                {
+                    title: "Gold Fitness Champion",
+                    desc: "Menyelesaikan kuis HOTS, refleksi, dan mencapai level tinggi.",
+                    unlocked: state.xp >= 250,
+                    icon: "fa-trophy",
+                    color: "text-yellow-400 border-yellow-400/30 bg-yellow-400/10"
+                }
+            ];
+
+            badges.forEach(badge => {
+                const div = document.createElement('div');
+                div.className = `p-5 rounded-2xl border flex items-start space-x-4 ${badge.unlocked ? badge.color : 'bg-darkBg/50 border-white/5 opacity-50'}`;
+                div.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid ${badge.icon}"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm text-white">${badge.title}</h4>
+                        <p class="text-[11px] text-gray-300 mt-1">${badge.desc}</p>
+                        <span class="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${badge.unlocked ? 'bg-neonGreen/20 text-neonGreen' : 'bg-gray-500/20 text-gray-400'}">
+                            ${badge.unlocked ? 'TERBUKA (UNLOCKED)' : 'BELUM TERBUKA'}
+                        </span>
+                    </div>
+                `;
+                badgesContainer.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
